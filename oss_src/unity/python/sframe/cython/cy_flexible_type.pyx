@@ -132,6 +132,7 @@ cimport cython
 from cython.operator cimport dereference as deref
 from cython.operator cimport preincrement as inc
 from libcpp cimport bool as cbool
+from libcpp.vector cimport vector
 from cpython cimport array
 
 from cy_cpp_utils cimport str_to_cpp, cpp_to_str, unsafe_str_to_cpp, unsafe_unicode_to_cpp
@@ -618,13 +619,15 @@ ctypedef fused _listlike:
     tuple
     object[:]
 
+ctypedef unsigned int size_type
+
 cdef int _listlike_can_be_vector(_listlike v, vector[int]* tr_code_buffer = NULL):
     cdef int tr_code
     cdef size_t i
     cdef size_t n = len(v)
 
     if tr_code_buffer != NULL:
-        tr_code_buffer[0].assign(n, -1)
+        tr_code_buffer[0].assign(<size_type> n, -1)
 
     if n == 0:
         return False

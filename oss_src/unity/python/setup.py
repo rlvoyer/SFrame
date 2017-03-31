@@ -153,7 +153,6 @@ if __name__ == '__main__':
         install_requires=[
             "boto == 2.33.0",
             "decorator == 4.0.9",
-            "tornado == 4.3",
             "prettytable == 0.7.2",
             "requests == 2.9.1",
             "awscli == 1.6.2",

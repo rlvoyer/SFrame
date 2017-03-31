@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 2.8.3)
 
 # Libraries linked via full path no longer produce linker search paths.
 cmake_policy(SET CMP0003 NEW)
-# Preprocessor definition values are now escaped automaticallyn.
+# Preprocessor definition values are now escaped automatically.
 cmake_policy(SET CMP0005 NEW)
 # for cmake 3.0
 if(${CMAKE_MAJOR_VERSION} GREATER 2)
@@ -29,6 +29,9 @@ if (PYTHON_VERSION)
 else()
         set(PYTHON_VERSION "python2.7")
 endif()
+
+find_package(PythonLibs REQUIRED)
+include_directories(${PYTHON_INCLUDE_DIRS})
 
 include(CheckLibraryExists)
 include(CheckFunctionExists)

@@ -26,7 +26,7 @@ make_library(pylambda_worker
 )
 
 
-if(${R_INTEGRATION} AND NOT WIN32)
+if("${R_INTEGRATION}" AND NOT WIN32)
 # not build this on Windows now, since we have no idea it can pass or not
     make_library(rcpplambda
       SOURCES
