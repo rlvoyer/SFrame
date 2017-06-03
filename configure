@@ -57,10 +57,6 @@ function print_help {
     echo
     echo "  --python_only           Only run python dependency installation."
     echo
-    echo "  --python3               Use Python 3.4, default is Python 2.7."
-    echo
-    echo "  --python3.6             Use Python 3.6, default is Python 2.7."
-    echo
     echo "  --toolchain=[toolchain] Toolchain is either a dato-deps file on disk, "
     echo "                          or a URL to a toolchain. If toolchain is"
     echo "                          \"default\", a default one is selected"
@@ -131,11 +127,6 @@ if [ -e deps/local/bin/cc ]; then
     has_existing_toolchain=1
 fi
 
-if [[ $python35 == 1 && $python3 ]]; then
-    echo "Two versions of Python specified. Pick one."
-    exit 1
-fi
-
 dependency_bad_version=0
 if [ -e deps_version ]; then
     cur_version=`cat deps_version`
@@ -174,8 +165,6 @@ do case $1 in
        --yes)                  default_yes=1;;
        --cmake_only)           cmake_only=1;;
        --python_only)          python_only=1;;
-       --python3)              python3=1;;
-       --python3.6)            python36=1;;
        --R_integration)        R_integration=1;;
        --help)                 print_help ;;
        -D)                     CFLAGS="$CFLAGS -D $2"; shift ;;
@@ -215,22 +204,13 @@ if [[ $python_only == 1 ]]; then
     run_cmake_configure=0
 fi
 
-if [[ $python3 == 1 ]]; then
-    CFLAGS="$CFLAGS -D PYTHON_VERSION=\"python3.4m\""
-    PYTHON_VERSION="python3.4m"
-elif [[ $python36 == 1 ]]; then
-    CFLAGS="$CFLAGS -D PYTHON_VERSION=\"python3.6m\""
-    PYTHON_VERSION="python3.6m"
-else
-    CFLAGS="$CFLAGS -D PYTHON_VERSION=\"python2.7\""
-    PYTHON_VERSION="python2.7"
-fi
+PYTHON_EXECUTABLE=$PYTHON_EXECUTABLE_DIR/python
 
 if [[ $run_toolchain_install == 1 ]]; then
     run_cleanup
 
     cd ${GRAPHLAB_HOME}
-    PYTHON_VERSION=${PYTHON_VERSION} ./oss_local_scripts/install_python_toolchain.sh
+    PYTHON_VERSION=${PYTHON_VERSION} PYTHON_EXECUTABLE=${PYTHON_EXECUTABLE} ./oss_local_scripts/install_python_toolchain.sh
 
     REMAINING_OPTIONS=$@
     if [[ $toolchain == default || $toolchain == "" ]]; then
@@ -317,7 +297,7 @@ if [[ $OSTYPE == darwin* ]]; then
                     -D CMAKE_OSX_DEPLOYMENT_TARGET=10.8"
 fi
 
-CFLAGS="$CFLAGS $LINKER"
+CFLAGS="$CFLAGS -D PYTHON_VERSION=\"$PYTHON_VERSION\" -D PYTHON_EXECUTABLE=\"$PYTHON_EXECUTABLE\" $LINKER"
 
 if [[ $OSTYPE == msys ]]; then
     CFLAGS="$CFLAGS -G \"MSYS Makefiles\""

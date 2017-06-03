@@ -55,7 +55,6 @@ def load_images(url, format='auto', with_path=True, recursive=True, ignore_failu
     >>> image_sarray = graphlab.image_analysis.load_images(url, "auto", with_path=False,
     ...                                                    recursive=True)
     """
-    _mt._get_metric_tracker().track('image_analysis.load_images')
     from ... import extensions as _extensions
     from ...util import _make_internal_url
     return _extensions.load_images(_make_internal_url(url), format, with_path,
@@ -134,7 +133,6 @@ def resize(image, width, height, channels=None, decode=False):
 
     from ...data_structures.sarray import SArray as _SArray
     from ... import extensions as _extensions
-    _mt._get_metric_tracker().track('image_analysis.resize')
     if type(image) is _Image:
         if channels is None:
             channels = image.channels

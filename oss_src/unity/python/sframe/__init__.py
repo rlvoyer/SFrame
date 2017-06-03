@@ -33,7 +33,6 @@ from .util import set_runtime_config
 from .util import get_runtime_config
 from .version_info import __VERSION__, version, build_number
 
-from .connect import _get_metric_tracker
 from . import visualization
 
 import os as _os

@@ -3,7 +3,8 @@
 set -x
 set -e 
 
-python_scripts=deps/conda/bin
+python_scripts=${PYTHON_EXECUTABLE_DIR:-deps/conda/bin}
+
 if [[ $OSTYPE == msys ]]; then
     python_scripts=deps/conda/bin/Scripts
 fi
@@ -51,6 +52,11 @@ function download_file {
 } # end of download file
 
 haspython=0
+
+if [ -e $PYTHON_EXECUTABLE ]; then
+    haspython=1
+fi
+
 if [ -e deps/conda/bin/python ]; then
     haspython=1
 fi
@@ -58,6 +64,7 @@ fi
 if [ -e deps/conda/bin/python.exe ]; then
     haspython=1
 fi
+
 if [[ $haspython == 0 ]]; then
     if [[ $OSTYPE == darwin* ]]; then
         if [ ! -e miniconda.sh ]; then
@@ -83,6 +90,11 @@ if [[ $haspython == 0 ]]; then
         cmd /C "miniconda.exe /S /RegisterPython=0 /AddToPath=0 /D=`cygpath -w $PWD/deps/conda/bin`"
         mkdir -p $PWD/deps/conda/lib
         cp $PWD/deps/conda/bin/*.dll $PWD/deps/conda/lib
+        # for windows
+        if [ -e deps/conda/bin/include ]; then
+            mkdir -p deps/conda/include/${PYTHON_VERSION}
+            cp deps/conda/bin/include/* deps/conda/include/${PYTHON_VERSION}
+        fi        
     else
         if [ ! -e miniconda.sh ]; then
             if [[ ${PYTHON_VERSION} == "python3.4m" ]]; then
@@ -95,21 +107,18 @@ if [[ $haspython == 0 ]]; then
         fi
         bash ./miniconda.sh -p $PWD/deps/conda -b
     fi
-fi
-$python_scripts/conda install -y --file oss_local_scripts/conda_requirements.txt
-$python_scripts/pip install -r oss_local_scripts/pip_requirements.txt
-# for windows
-if [ -e deps/conda/bin/include ]; then
-    mkdir -p deps/conda/include/${PYTHON_VERSION}
-    cp deps/conda/bin/include/* deps/conda/include/${PYTHON_VERSION}
+
+    mkdir -p deps/local/lib
+    mkdir -p deps/local/include
+    if [ $OSTYPE == "msys" ]; then
+        cp deps/conda/lib/python*.dll deps/local/lib
+    else
+        cp deps/conda/lib/libpython* deps/local/lib
+    fi
+    cp -R deps/conda/include/${PYTHON_VERSION}/* deps/local/include
 fi
 
 windows_patch_python_header
-mkdir -p deps/local/lib
-mkdir -p deps/local/include
-if [ $OSTYPE == "msys" ]; then
-    cp deps/conda/lib/python*.dll deps/local/lib
-else
-    cp deps/conda/lib/libpython* deps/local/lib
-fi
-cp -R deps/conda/include/${PYTHON_VERSION}/* deps/local/include
+
+#$python_scripts/conda install -y --file oss_local_scripts/conda_requirements.txt
+$python_scripts/pip install -r oss_local_scripts/pip_requirements.txt

@@ -15,7 +15,6 @@ All rights reserved.
 This software may be modified and distributed under the terms
 of the BSD license. See the LICENSE file for details.
 '''
-from .. import connect as _mt
 from ..connect import main as glconnect
 from ..cython.cy_flexible_type import infer_type_of_list
 from ..cython.context import debug_trace as cython_context
@@ -855,11 +854,6 @@ class SFrame(object):
         """__init__(data=list(), format='auto')
         Construct a new SFrame from a url or a pandas.DataFrame.
         """
-        # emit metrics for num_rows, num_columns, and type (local://, s3, hdfs, http)
-        SFrame.__construct_ctr += 1
-        if SFrame.__construct_ctr % 1000 == 0:
-            _mt._get_metric_tracker().track('sframe.init1000')
-
         if (_proxy):
             self.__proxy__ = _proxy
         else:
@@ -868,7 +862,6 @@ class SFrame(object):
             if (format == 'auto'):
                 if (HAS_PANDAS and isinstance(data, pandas.DataFrame)):
                     _format = 'dataframe'
-                    _mt._get_metric_tracker().track('sframe.location.memory', value=1)
                 elif (isinstance(data, str) or
                       (sys.version_info.major < 3 and isinstance(data, unicode))):
                     if data.find('://') == -1:
@@ -1853,7 +1846,6 @@ class SFrame(object):
         >>> rdd.collect()
         [{'x': 1L, 'y': 'fish'}, {'x': 2L, 'y': 'chips'}, {'x': 3L, 'y': 'salad'}]
         """
-        _mt._get_metric_tracker().track('sframe.to_rdd')
         if not RDD_SUPPORT:
             raise Exception("Support for translation to Spark RDDs not enabled.")
 
@@ -1945,7 +1937,6 @@ class SFrame(object):
         +-----+
         [3 rows x 1 columns]
         """
-        _mt._get_metric_tracker().track('sframe.from_rdd')
         if not RDD_SUPPORT:
             raise Exception("Support for translation to Spark RDDs not enabled.")
 
@@ -2063,7 +2054,6 @@ class SFrame(object):
 
         >>> join_result = graphlab.SFrame.from_odbc(db, 'SELECT * FROM "MyTable" a, "AnotherTable" b WHERE a.id=b.id')
         """
-        _mt._get_metric_tracker().track('sframe.from_odbc')
         result = db.execute_query(sql)
         if not isinstance(result, SFrame):
             raise RuntimeError("Cannot create an SFrame for query. No result set.")
@@ -2125,7 +2115,6 @@ class SFrame(object):
 
         >>> sf.to_odbc(db, 'a_cool_table')
         """
-        _mt._get_metric_tracker().track('sframe.to_odbc')
         if (not verbose):
             glconnect.get_server().set_log_progress(False)
 
@@ -2241,8 +2230,6 @@ class SFrame(object):
         #    in labeling datetime.datetime, float, or str. If a suitable
         #    mapping isn't found, we fall back to str.
         mod_info = _get_global_dbapi_info(dbapi_module, conn)
-        _mt._get_metric_tracker().track('sframe.from_sql',
-                properties={'module_name':mod_info['module_name']})
 
         from .sframe_builder import SFrameBuilder
 
@@ -2399,8 +2386,6 @@ class SFrame(object):
           schema of the DB table. True by default.
         """
         mod_info = _get_global_dbapi_info(dbapi_module, conn)
-        _mt._get_metric_tracker().track('sframe.to_sql',
-                properties={'module_name':mod_info['module_name']})
         c = conn.cursor()
 
         col_info = list(zip(self.column_names(), self.column_types()))

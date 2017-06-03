@@ -32,7 +32,6 @@ def connect_odbc(conn_str):
     from .. import connect as _mt
     db = extensions._odbc_connection.unity_odbc_connection()
     db._construct_from_odbc_conn_str(conn_str)
-    _mt._get_metric_tracker().track('connect_odbc', properties={'dbms_name':db.dbms_name,'dbms_version':db.dbms_version})
     return db
 
 def set_libodbc_path(path):

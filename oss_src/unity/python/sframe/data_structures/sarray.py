@@ -14,7 +14,6 @@ This software may be modified and distributed under the terms
 of the BSD license. See the LICENSE file for details.
 '''
 
-from .. import connect as _mt
 from ..connect import main as glconnect
 from ..cython.cy_flexible_type import pytype_from_dtype, pytype_from_array_typecode
 from ..cython.cy_flexible_type import infer_type_of_list, infer_type_of_sequence
@@ -312,10 +311,6 @@ class SArray(object):
         Construct a new SArray. The source of data includes: list,
         numpy.ndarray, pandas.Series, and urls.
         """
-        SArray.__construct_ctr += 1
-        if SArray.__construct_ctr % 1000 == 0:
-            _mt._get_metric_tracker().track('sarray.init1000')
-
         if dtype is not None and type(dtype) != type:
             raise TypeError('dtype must be a type, e.g. use int rather than \'int\'')
 
@@ -1872,8 +1867,6 @@ class SArray(object):
             dtype = infer_type_of_list(dryrun)
         if seed is None:
             seed = abs(hash("%0.20f" % time.time())) % (2 ** 31)
-
-        # log metric
 
         # First phase test if it is a toolkit function
         nativefn = None

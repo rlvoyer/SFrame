@@ -619,7 +619,7 @@ ctypedef fused _listlike:
     tuple
     object[:]
 
-ctypedef unsigned int size_type
+ctypedef size_t size_type
 
 cdef int _listlike_can_be_vector(_listlike v, vector[int]* tr_code_buffer = NULL):
     cdef int tr_code

@@ -1062,7 +1062,6 @@ class SGraph(object):
         with cython_context():
             self.__proxy__.save_graph(_make_internal_url(filename), format)
 
-
     def show(self, vlabel=None, vlabel_hover=False, vcolor=[0.522, 0.741, 0.],
              highlight={}, highlight_color=[0.69, 0., 0.498], node_size=300,
              elabel=None, elabel_hover=False, ecolor=[0.37, 0.33, 0.33],

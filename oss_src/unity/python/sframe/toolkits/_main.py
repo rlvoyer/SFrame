@@ -11,7 +11,6 @@ of the BSD license. See the LICENSE file for details.
 Internal Toolkit Calling
 """
 
-from ..connect import _get_metric_tracker
 from ..connect import main as glconnect
 
 import time
@@ -74,16 +73,10 @@ def run(toolkit_name, options, verbose=True, show_progress=False):
         if (len(message) > 0):
             track_props['message'] = message
 
-    metric_name = 'toolkit.%s.executed' % (toolkit_name)
-    _get_metric_tracker().track(metric_name, value=1, properties=track_props, send_sys_info=False)
-
     # set the verbose level back to default
     glconnect.get_server().set_log_progress(True)
 
     if success:
         return params
     else:
-        metric_name = 'toolkit.%s.toolkit_error' % (toolkit_name)
-        _get_metric_tracker().track(metric_name, value=1, properties=track_props, send_sys_info=False)
-
         raise ToolkitError(str(message))

@@ -10,7 +10,6 @@ of the BSD license. See the LICENSE file for details.
 """
 
 from ..util.config import DEFAULT_CONFIG as default_local_conf
-from ..connect import _get_metric_tracker
 from .. import sys_util as _sys_util
 import logging
 import os
@@ -105,13 +104,7 @@ class EmbeddedServer(GraphLabServer):
     def get_server_addr(self):
         return self.server_addr
 
-    def send_engine_start_metrics(self):
-        _get_metric_tracker().track('engine-started', value=1, send_sys_info=True)
-        _get_metric_tracker().track('engine-started-local', value=1, send_sys_info=True)
-
     def start(self):
-        self.send_engine_start_metrics()
-
         if sys.platform == 'win32':
             self.unity_log += ".0"
 
@@ -134,7 +127,6 @@ class EmbeddedServer(GraphLabServer):
         try:
             start_server(server_opts)
         except Exception as e:
-            _get_metric_tracker().track('server_launch.unity_server_error', send_sys_info=True)
             raise
         
         self.started = True

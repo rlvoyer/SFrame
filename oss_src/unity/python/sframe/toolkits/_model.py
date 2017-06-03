@@ -9,7 +9,6 @@ All rights reserved.
 This software may be modified and distributed under the terms
 of the BSD license. See the LICENSE file for details.
 '''
-from .. import connect as _mt
 from ..connect import main as glconnect
 from ..data_structures.sframe import SFrame as _SFrame
 from ..toolkits._internal_utils import _map_unity_proxy_to_object, \
@@ -42,8 +41,6 @@ def load_model(location):
     >>> model.save('my_model_file')
     >>> loaded_model = gl.load_model('my_model_file')
     """
-    _mt._get_metric_tracker().track('toolkit.model.load_model')
-
     _internal_url = _make_internal_url(location)
     try:
         return glconnect.get_unity().load_model(_internal_url)
@@ -148,7 +145,6 @@ def _get_default_options_wrapper(unity_server_model_name,
           # dict formatted output suitable for JSON serialization.
           >>> out_sframe = graphlab.{module_name}.get_default_options('json')
         """
-        _mt._get_metric_tracker().track('toolkit.%s.get_default_options' % module_name)
         from .. import extensions as _extensions
         if sdk_model:
             response = _extensions._toolkits_sdk_get_default_options(
@@ -359,7 +355,6 @@ class CustomModel(object):
         elif output == 'dict':
             return _toolkit_serialize_summary_struct( self, \
                                             *self._get_summary_struct() )
-        _mt._get_metric_tracker().track(self.__class__.__module__ + '.summary')
         try:
             print(self.__repr__())
         except:
@@ -510,7 +505,6 @@ class Model(CustomModel):
         --------
         >>> fields = m.list_fields()
         """
-        _mt._get_metric_tracker().track(self.__class__.__module__ + '.list_fields')
         return self.__proxy__.list_fields()
 
     def get(self, field):
@@ -566,7 +560,6 @@ class Model(CustomModel):
         >>> loaded_model = graphlab.load_model('my_model_file')
 
         """
-        _mt._get_metric_tracker().track('toolkit.model.save')
         return glconnect.get_unity().save_model(self, _make_internal_url(location))
 
     def __repr__(self):

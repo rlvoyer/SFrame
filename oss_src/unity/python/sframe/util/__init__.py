@@ -522,7 +522,6 @@ def crossproduct(d):
     """
 
     from .. import connect as _mt
-    _mt._get_metric_tracker().track('util.crossproduct')
     from .. import SArray
     d = [list(zip(list(d.keys()), x)) for x in _itertools.product(*list(d.values()))]
     sa = [{k:v for (k,v) in x} for x in d]
