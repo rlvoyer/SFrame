@@ -498,7 +498,7 @@ def _add_meta_path():
     global _ext_meta_path_singleton
     if _ext_meta_path_singleton == None:
         _ext_meta_path_singleton = _ExtMetaPath()
-        sys.meta_path += [_ext_meta_path_singleton]
+        sys.meta_path = [_ext_meta_path_singleton] + sys.meta_path
 
 
 def ext_import(soname, module_subpath=""):
