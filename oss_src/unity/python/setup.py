@@ -9,16 +9,17 @@ of the BSD license. See the TURI-PYTHON-LICENSE file for details.
 
 import os
 import sys
-import glob
-import subprocess
 from setuptools import setup, find_packages
 from setuptools.dist import Distribution
 from setuptools.command.install import install
 
-# Prevent distutils from thinking we are a pure python package
+
+# Prevent distutils from thinking that this is a pure Python package
 class BinaryDistribution(Distribution):
-    def is_pure(self):
-        return False
+    """Distribution which always forces a binary package with platform name"""
+    def has_ext_modules(foo):
+        return True
+
 
 class InstallEngine(install):
     """Helper class to hook the python setup.py install path to download client libraries and engine"""
@@ -32,16 +33,19 @@ class InstallEngine(install):
         # Check correct version of architecture (64-bit only)
         arch = platform.architecture()[0]
         if arch != '64bit':
-            msg = ("SFrame currently supports only 64-bit operating systems, and only recent Linux/OSX " +
-                   "architectures. Please install using a supported version. Your architecture is currently: %s" % arch)
+            msg = (
+                "SFrame currently supports only 64-bit operating systems, and only recent "
+                "Linux/OSX architectures. Please install using a supported version. "
+                "Your architecture is currently: %s" % arch)
 
             sys.stderr.write(msg)
             sys.exit(1)
 
         # Check correct version of Python
         if sys.version_info.major == 2 and sys.version_info[:2] < (2, 7):
-            msg = ("SFrame requires at least Python 2.7, please install using a supported version."
-                   + " Your current Python version is: %s" % sys.version)
+            msg = (
+                "SFrame requires at least Python 2.7, please install using a supported version. "
+                "Your current Python version is: %s" % sys.version)
             sys.stderr.write(msg)
             sys.exit(1)
 
@@ -49,55 +53,47 @@ class InstallEngine(install):
         from distutils.util import get_platform
         from pkg_resources import parse_version
         cur_platform = get_platform()
-        py_shobj_ext = 'so'
 
         if cur_platform.startswith("macosx"):
-
             mac_ver = platform.mac_ver()[0]
             if parse_version(mac_ver) < parse_version('10.8.0'):
                 msg = (
-                "SFrame currently does not support versions of OSX prior to 10.8. Please upgrade your Mac OSX "
-                "installation to a supported version. Your current OSX version is: %s" % mac_ver)
+                    "SFrame currently does not support versions of OSX prior to 10.8. "
+                    "Please upgrade your Mac OSX installation to a supported version. "
+                    "Your current OSX version is: %s" % mac_ver)
                 sys.stderr.write(msg)
                 sys.exit(1)
         elif cur_platform.startswith('linux'):
             pass
         elif cur_platform.startswith('win'):
-            py_shobj_ext = 'pyd'
             win_ver = platform.version()
             # Verify this is Vista or above
             if parse_version(win_ver) < parse_version('6.0'):
                 msg = (
-                "SFrame currently does not support versions of Windows"
-                " prior to Vista, or versions of Windows Server prior to 2008."
-                "Your current version of Windows is: %s" % platform.release())
+                    "SFrame currently does not support versions of Windows prior to Vista, "
+                    "or versions of Windows Server prior to 2008. "
+                    "Your current version of Windows is: %s" % platform.release())
                 sys.stderr.write(msg)
                 sys.exit(1)
         else:
             msg = (
-                "Unsupported Platform: '%s'. SFrame is only supported on Windows, Mac OSX, and Linux." % cur_platform
-            )
+                "Unsupported Platform: '%s'. " % cur_platform +
+                "SFrame is only supported on Windows, Mac OSX, and Linux.")
             sys.stderr.write(msg)
             sys.exit(1)
 
-        print ("")
-        print ("")
-        print ("")
-        print ("Thank you for downloading and trying SFrame.")
-        print ("")
-        print ("")
-        print ("")
-
-        from distutils import sysconfig
-        import stat
-        import glob
-
-        root_path = os.path.join(self.install_lib, 'sframe')
+        print("")
+        print("")
+        print("")
+        print("Thank you for downloading and trying SFrame.")
+        print("")
+        print("")
+        print("")
 
 
 if __name__ == '__main__':
     from distutils.util import get_platform
-    classifiers=[
+    classifiers = [
         "Development Status :: 5 - Production/Stable",
         "Environment :: Console",
         "Intended Audience :: Developers",
@@ -117,46 +113,49 @@ if __name__ == '__main__':
     if cur_platform.startswith("macosx"):
         classifiers.append("Operating System :: MacOS :: MacOS X")
     elif cur_platform.startswith('linux'):
-        classifiers +=  ["Operating System :: POSIX :: Linux",
-                         "Operating System :: POSIX :: BSD",
-                         "Operating System :: Unix"]
+        classifiers += ["Operating System :: POSIX :: Linux",
+                        "Operating System :: POSIX :: BSD",
+                        "Operating System :: Unix"]
     elif cur_platform.startswith('win'):
         classifiers += ["Operating System :: Microsoft :: Windows"]
     else:
         msg = (
-            "Unsupported Platform: '%s'. SFrame is only supported on Windows, Mac OSX, and Linux." % cur_platform
-            )
+            "Unsupported Platform: '%s'. " % cur_platform +
+            "SFrame is only supported on Windows, Mac OSX, and Linux.")
+
         sys.stderr.write(msg)
         sys.exit(1)
 
-    version_number='1.9'#{{VERSION_STRING}}
+    version_number = '1.9.2'  # {{VERSION_STRING}}
     setup(
         name="SFrame",
         version=version_number,
-        author='Turi',
-        author_email='contact@turi.com',
+        author="Turi",
+        author_email="contact@turi.com",
         cmdclass=dict(install=InstallEngine),
         distclass=BinaryDistribution,
         package_data={
-        'sframe': ['cython/*.so', 'cython/*.pyd', 'cython/*.dll',
-                     '*.so', '*.so.1', '*.dylib',
-                     '*.dll', '*.def', 'spark_unity.jar',
-                     'deploy/*.jar', '*.exe', 'libminipsutil.*'
-                     ]},
+            "sframe": [
+                "cython/*.so", "cython/*.pyd", "cython/*.dll", "*.so", "*.so.1", "*.dylib",
+                "*.dll", "*.def", "spark_unity.jar", "deploy/*.jar", "*.exe", "libminipsutil.*"
+            ]},
         packages=find_packages(
-            exclude=["*.tests", "*.tests.*", "tests.*", "tests", "*.test", "*.test.*", "test.*", "test"]),
-        url='https://turi.com',
-        license='BSD',
-        description='SFrame is an scalable, out-of-core dataframe, which allows you to work with datasets that are larger than the amount of RAM on your system.',
-        # long_description=open('README.txt').read(),
+            exclude=[
+                "*.tests", "*.tests.*", "tests.*", "tests", "*.test", "*.test.*", "test.*", "test"
+            ]),
+        url="https://turi.com",
+        license="BSD",
+        description=(
+            "SFrame is an scalable, out-of-core dataframe, which allows you to work with "
+            "datasets that are larger than the amount of RAM on your system."),
         classifiers=classifiers,
         install_requires=[
-            "boto == 2.33.0",
-            "decorator == 4.0.9",
-            "prettytable == 0.7.2",
-            "requests == 2.9.1",
-            "awscli == 1.6.2",
+            "boto==2.33.0",
+            "decorator==4.0.9",
+            "prettytable==0.7.2",
+            "requests==2.9.1",
+            "awscli==1.6.2",
             "multipledispatch>=0.4.7",
-            "certifi==2015.04.28" # we need to downgrade certifi to work with S3
+            "certifi==2015.04.28"  # we need to downgrade certifi to work with S3
         ],
     )
